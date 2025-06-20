@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Praktik Keamanan Web DVWA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a3a, #2c3e50);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .canvas-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 Q50,20 100,0 L100,100 Q50,80 0,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+        
+        .divider {
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--secondary));
+            margin: 20px 0;
+            border-radius: 2px;
+        }
+        
+        .section {
+            padding: 30px 40px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section-title {
+            color: var(--secondary);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            background: var(--secondary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .card-title {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: var(--secondary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e9f7fe;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .code-block i {
+            color: #f1c40f;
+        }
+        
+        .code-keyword {
+            color: #f92672;
+        }
+        
+        .code-string {
+            color: #a6e22e;
+        }
+        
+        .code-comment {
+            color: #75715e;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .grid-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-top: 4px solid var(--success);
+        }
+        
+        .grid-item h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .screenshot {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .screenshot img {
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .screenshot img:hover {
+            transform: scale(1.02);
+        }
+        
+        .screenshot-placeholder {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #e0e0e0, #f5f5f5);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            margin-bottom: 15px;
+        }
+        
+        .footer {
+            padding: 30px 40px;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            border: 2px solid var(--secondary);
+        }
+        
+        .btn:hover {
+            background: transparent;
+            color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-download {
+            background: var(--success);
+            border-color: var(--success);
+        }
+        
+        .btn-download:hover {
+            color: var(--success);
+        }
+        
+        .screenshot-caption {
+            font-weight: 500;
+            color: var(--dark);
+            text-align: center;
+            font-size: 1.1rem;
+            padding: 0 10px;
+        }
+        
+        .screenshot-number {
+            background: var(--accent);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
+            
+            .screenshot img {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas-container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1>LAPORAN PRAKTIK UJI KEAMANAN WEB APLIKASI MENGGUNAKAN DVWA</h1>
+            <p>Laporan Konfigurasi Damn Vulnerable Web Application (DVWA) pada Docker</p>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-book-open"></i>1. Pendahuluan</h2>
+            <p>Keamanan aplikasi web merupakan aspek krusial dalam pengembangan sistem informasi modern. Salah satu metode untuk menguji ketahanan aplikasi terhadap serangan siber adalah dengan melakukan uji penetrasi menggunakan platform Damn Vulnerable Web Application (DVWA).</p>
+            <p>DVWA dirancang sebagai sarana edukatif untuk memahami berbagai jenis kerentanan aplikasi web. Dalam praktik ini, fokus diarahkan pada eksploitasi kerentanan <strong>Brute Force Attack</strong> terhadap halaman login, dengan tujuan mengidentifikasi kelemahan sistem otentikasi yang tidak dilindungi secara memadai.</p>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-bullseye"></i>2. Tujuan</h2>
+            <div class="grid">
+                <div class="grid-item">
+                    <h3>Identifikasi Kelemahan</h3>
+                    <p>Mengidentifikasi kelemahan sistem otentikasi melalui metode brute force.</p>
+                </div>
+                <div class="grid-item">
+                    <h3>Evaluasi Kontrol Keamanan</h3>
+                    <p>Mengevaluasi efektivitas kontrol keamanan pada form login.</p>
+                </div>
+                <div class="grid-item">
+                    <h3>Rekomendasi Perbaikan</h3>
+                    <p>Memberikan rekomendasi perbaikan berbasis temuan eksploitasi.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-server"></i>3. Lingkungan Pengujian</h2>
+            <table>
+                <tr>
+                    <th>Komponen</th>
+                    <th>Detail</th>
+                </tr>
+                <tr>
+                    <td>Aplikasi</td>
+                    <td>Damn Vulnerable Web Application (DVWA)</td>
+                </tr>
+                <tr>
+                    <td>Platform</td>
+                    <td>Docker</td>
+                </tr>
+                <tr>
+                    <td>Browser</td>
+                    <td>Google Chrome / Mozilla Firefox</td>
+                </tr>
+                <tr>
+                    <td>Sistem Operasi</td>
+                    <td>Windows 10</td>
+                </tr>
+                <tr>
+                    <td>Tools Tambahan</td>
+                    <td>(Opsional) Hydra / Burp Suite</td>
+                </tr>
+                <tr>
+                    <td>Port</td>
+                    <td>8080 (localhost)</td>
+                </tr>
+            </table>
+            
+            <div class="card">
+                <h3 class="card-title">Perintah Awal</h3>
+                <div class="code-block">
+                    <span class="code-comment"># Download image DVWA dari Docker Hub</span><br>
+                    <span class="code-keyword">docker</span> pull vulnerables/web-dvwa<br><br>
+                    
+                    <span class="code-comment"># Menjalankan container DVWA</span><br>
+                    <span class="code-keyword">docker</span> run --rm -p 8080:80 vulnerables/web-dvwa
+                </div>
+                <p>Aplikasi diakses melalui: <code>http://localhost:8080</code></p>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-bug"></i>4. Skema Serangan: Brute Force Attack</h2>
+            
+            <div class="card">
+                <h3 class="card-title">4.1 Deskripsi Kerentanan</h3>
+                <p>Brute force attack adalah metode percobaan masuk ke sistem dengan mencoba berbagai kombinasi username dan password secara otomatis hingga menemukan yang benar. Kerentanan ini sangat berbahaya jika sistem tidak dilengkapi dengan fitur keamanan seperti rate limiting, CAPTCHA, dan penguncian akun.</p>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">4.2 Proses Eksploitasi</h3>
+                <ol>
+                    <li><strong>Akses Menu Brute Force</strong><br>Navigasi ke: <code>Vulnerabilities → Brute Force</code></li>
+                    <li><strong>Observasi Form Login</strong><br>Tidak terdapat CAPTCHA atau pembatasan percobaan.</li>
+                    <li><strong>Percobaan Manual</strong><br>Username: <code>admin</code><br>Password: <code>password</code>, <code>admin</code>, <code>123456</code>, dll.</li>
+                    <li><strong>Analisis Respons</strong><br>Sistem memberikan feedback jelas jika gagal.</li>
+                    <li><strong>Eksploitasi Otomatis (Opsional)</strong>
+                        <div class="code-block">
+                            <span class="code-comment"># Contoh serangan dengan Hydra</span><br>
+                            hydra -l admin -P wordlist.txt 127.0.0.1 http-post-form <span class="code-string">"/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:Username and/or password incorrect"</span>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">4.3 Hasil</h3>
+                <p>Berhasil masuk dengan kombinasi:</p>
+                <ul>
+                    <li>Username: <code>admin</code></li>
+                    <li>Password: <code>password</code></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-camera"></i>5. Bukti Praktik</h2>
+            <div class="screenshot">
+                <img src="/Proses pull dan run DVWA dari Docker.png" alt="Proses pull dan run DVWA dari Docker">
+                <p class="screenshot-caption"><span class="screenshot-number">1</span> Gambar 1: Proses pull dan run DVWA dari Docker - Terminal menunjukkan proses pengunduhan dan menjalankan container DVWA</p>
+            </div>
+            
+            <div class="screenshot">
+                <img src="/Setup database DVWA.png" alt="Setup database DVWA">
+                <p class="screenshot-caption"><span class="screenshot-number">2</span> Gambar 2: Setup database DVWA - Halaman konfigurasi database pada aplikasi DVWA</p>
+            </div>
+            
+            <div class="screenshot">
+                <img src="/Halaman login vulnerable untuk brute force.png" alt="Halaman login vulnerable untuk brute force">
+                <p class="screenshot-caption"><span class="screenshot-number">3</span> Gambar 3: Halaman login vulnerable untuk brute force - Form login yang rentan terhadap serangan brute force</p>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-chart-bar"></i>6. Analisis dan Rekomendasi</h2>
+            
+            <div class="card">
+                <h3 class="card-title">6.1 Analisis Kelemahan</h3>
+                <p>DVWA tidak menerapkan:</p>
+                <ul>
+                    <li>Pembatasan percobaan login</li>
+                    <li>CAPTCHA</li>
+                    <li>Sistem penguncian akun</li>
+                    <li>Monitoring percobaan login mencurigakan</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">6.2 Rekomendasi</h3>
+                <div class="grid">
+                    <div class="grid-item">
+                        <h3>Implementasi rate limiting</h3>
+                        <p>Membatasi jumlah percobaan login dalam periode waktu tertentu</p>
+                    </div>
+                    <div class="grid-item">
+                        <h3>Integrasi CAPTCHA</h3>
+                        <p>Menambahkan tantangan untuk membedakan manusia dan bot</p>
+                    </div>
+                    <div class="grid-item">
+                        <h3>Penguncian akun otomatis</h3>
+                        <p>Mengunci akun setelah beberapa percobaan gagal</p>
+                    </div>
+                    <div class="grid-item">
+                        <h3>Multi-factor authentication</h3>
+                        <p>Menambahkan lapisan keamanan tambahan</p>
+                    </div>
+                    <div class="grid-item">
+                        <h3>Logging dan notifikasi</h3>
+                        <p>Mencatat dan memberi tahu tentang aktivitas mencurigakan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-check-circle"></i>7. Kesimpulan</h2>
+            <div class="card">
+                <p>Telah berhasil diidentifikasi dan dieksploitasi kerentanan Brute Force pada aplikasi DVWA. Hal ini menunjukkan pentingnya penerapan pengamanan autentikasi pada aplikasi web untuk mencegah serangan tidak sah.</p>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-cog"></i>Konfigurasi DVWA pada Docker</h2>
+            
+            <div class="card">
+                <h3 class="card-title">Langkah-Langkah Implementasi</h3>
+                <div class="code-block">
+                    <span class="code-comment"># Unduh Image DVWA</span><br>
+                    <span class="code-keyword">docker</span> pull vulnerables/web-dvwa<br><br>
+                    
+                    <span class="code-comment"># Jalankan Container</span><br>
+                    <span class="code-keyword">docker</span> run -d -p 8080:80 vulnerables/web-dvwa
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">Solusi Permasalahan Konfigurasi</h3>
+                <table>
+                    <tr>
+                        <th>Masalah</th>
+                        <th>Solusi</th>
+                    </tr>
+                    <tr>
+                        <td>Editor tidak tersedia</td>
+                        <td>Instal nano setelah perbaikan repository</td>
+                    </tr>
+                    <tr>
+                        <td>Repository Debian usang</td>
+                        <td>Ganti dengan archive.debian.org</td>
+                    </tr>
+                    <tr>
+                        <td>Error tanda tangan GPG</td>
+                        <td>Nonaktifkan pengecekan dengan file konfigurasi</td>
+                    </tr>
+                    <tr>
+                        <td>Konfigurasi reCAPTCHA</td>
+                        <td>Tambahkan kunci publik dan privat di config</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h3 class="card-title">File Konfigurasi config.inc.php</h3>
+                <div class="code-block">
+                    <span class="code-comment">&lt;?php</span><br>
+                    $_DVWA = <span class="code-keyword">array</span>();<br>
+                    $_DVWA[<span class="code-string">'db_server'</span>] = <span class="code-string">'127.0.0.1'</span>;<br>
+                    $_DVWA[<span class="code-string">'db_database'</span>] = <span class="code-string">'dvwa'</span>;<br>
+                    $_DVWA[<span class="code-string">'db_user'</span>] = <span class="code-string">'app'</span>;<br>
+                    $_DVWA[<span class="code-string">'db_password'</span>] = <span class="code-string">'password'</span>;<br>
+                    $_DVWA[<span class="code-string">'recaptcha_public_key'</span>] = <span class="code-string">'6LdU9WYrAAAAAFEzl_TwLYggJXtzKl0txJxvmtSL'</span>;<br>
+                    $_DVWA[<span class="code-string">'recaptcha_private_key'</span>] = <span class="code-string">'6LdU9WYrAAAAANDutDxco83nhRFE0QkRVPIIob8G'</span>;<br>
+                    $_DVWA[<span class="code-string">'use_captcha'</span>] = <span class="code-keyword">true</span>;<br>
+                    <span class="code-comment">?&gt;</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <h3>Laporan Praktik Keamanan Web dengan DVWA</h3>
+            <p>Siap untuk diunduh dalam format dokumen</p>
+            <div>
+                <a href="#" class="btn btn-download"><i class="fas fa-file-word"></i> Unduh Word</a>
+                <a href="#" class="btn btn-download"><i class="fas fa-file-pdf"></i> Unduh PDF</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Script untuk efek zoom pada screenshot
+        document.querySelectorAll('.screenshot img').forEach(img => {
+            img.addEventListener('click', function() {
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
+                overlay.style.display = 'flex';
+                overlay.style.justifyContent = 'center';
+                overlay.style.alignItems = 'center';
+                overlay.style.zIndex = '1000';
+                overlay.style.cursor = 'zoom-out';
+                
+                const zoomedImg = document.createElement('img');
+                zoomedImg.src = this.src;
+                zoomedImg.style.maxWidth = '90%';
+                zoomedImg.style.maxHeight = '90%';
+                zoomedImg.style.borderRadius = '8px';
+                zoomedImg.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+                
+                overlay.appendChild(zoomedImg);
+                document.body.appendChild(overlay);
+                
+                overlay.addEventListener('click', function() {
+                    document.body.removeChild(overlay);
+                });
+            });
+        });
+        
+        // Efek animasi saat scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.section, .card, .screenshot').forEach(el => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
